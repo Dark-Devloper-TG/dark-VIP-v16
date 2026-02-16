@@ -4,7 +4,6 @@
    ============================================= */
 
 // 1. FIREBASE CONFIGURATION
-// Ye logic ab external file me hai, HTML source me nahi dikhega easily
 const firebaseConfig = {
     apiKey: "AIzaSyCXmlxcZ79hkycqnD_ZIuDBLtOI1zCHRaw",
     authDomain: "dark-vip-prediction.firebaseapp.com",
@@ -15,7 +14,6 @@ const firebaseConfig = {
     appId: "1:682755216649:web:b54cf89a4537db1e29afd8"
 };
 
-// Initialize Firebase
 try {
     firebase.initializeApp(firebaseConfig);
     var db = firebase.database();
@@ -31,25 +29,52 @@ let isVIPUnlocked = false;
 function showPage(pageId) {
     document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
-        page.style.display = 'none'; // Ensure strictly hidden
+        page.style.display = 'none';
     });
     const p = document.getElementById(pageId);
-    p.style.display = 'block'; // Ensure strictly visible
+    p.style.display = 'block';
     setTimeout(() => p.classList.add('active'), 10);
     window.scrollTo(0, 0);
 }
 
-// 4. GAME SELECTION LOGIC
+// 4. UTILITIES (Sound & Vibrate)
+function vibrate(ms) { 
+    if (navigator.vibrate) navigator.vibrate(ms); 
+}
+
+function beep() {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = 740;
+        gain.gain.value = .08;
+        osc.start();
+        setTimeout(() => {
+            osc.stop();
+            ctx.close();
+        }, 130);
+    } catch (e) {}
+}
+
+function toastMsg(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+// 5. GAME SELECTION LOGIC
 const selectGameBtn = document.getElementById('selectGameBtn');
 const gameModal = document.getElementById('gameModal');
 
 if(selectGameBtn) {
-    selectGameBtn.onclick = () => {
-        gameModal.style.display = 'flex';
-    };
+    selectGameBtn.onclick = () => { gameModal.style.display = 'flex'; };
 }
 
-// Make this global so HTML onclick works
 window.selectGame = function(gameName) {
     selectedGame = gameName;
     document.getElementById('selectedGameText').innerHTML = 
@@ -69,36 +94,27 @@ if(startNowBtn) {
 }
 
 const backBtn = document.getElementById('backBtn');
-if(backBtn) {
-    backBtn.onclick = () => showPage('page1');
-}
+if(backBtn) backBtn.onclick = () => showPage('page1');
 
-// 5. PAYMENT & VIP UNLOCK
+// 6. VIP UNLOCK LOGIC
 const payNowBtn = document.getElementById('payNowBtn');
 const qrModal = document.getElementById('qrModal');
 
-if(payNowBtn) {
-    payNowBtn.onclick = () => {
-        qrModal.style.display = 'flex';
-    };
-}
+if(payNowBtn) payNowBtn.onclick = () => qrModal.style.display = 'flex';
 
 const unlockVipBtn = document.getElementById('unlockVipBtn');
 if(unlockVipBtn) {
     unlockVipBtn.onclick = async () => {
         const vipCode = document.getElementById('vipCode').value.trim();
-        
         if (vipCode.length !== 6) {
             alert("Please enter a valid 6-digit VIP code!");
             return;
         }
-
         const btn = unlockVipBtn;
         btn.innerHTML = "Checking...";
         btn.disabled = true;
 
         try {
-            // Check in active_vip_codes
             const activeSnapshot = await db.ref('active_vip_codes/' + vipCode).once('value');
             let granted = false;
 
@@ -108,11 +124,8 @@ if(unlockVipBtn) {
                     granted = true;
                 }
             } else {
-                // Check old table
                 const oldSnapshot = await db.ref('vip_codes/' + vipCode).once('value');
-                if (oldSnapshot.exists() && oldSnapshot.val() !== false) {
-                    granted = true;
-                }
+                if (oldSnapshot.exists() && oldSnapshot.val() !== false) granted = true;
             }
 
             if (granted) {
@@ -123,8 +136,7 @@ if(unlockVipBtn) {
                 alert("❌ Invalid or Expired Code");
             }
         } catch (error) {
-            console.error("DB Error:", error);
-            alert("Connection Error. Try again.");
+            alert("Connection Error");
         } finally {
             btn.innerHTML = '<i class="fas fa-unlock"></i> UNLOCK VIP ACCESS';
             btn.disabled = false;
@@ -132,49 +144,72 @@ if(unlockVipBtn) {
     };
 }
 
-// 6. DASHBOARD & PREDICTION LOGIC
+// 7. DASHBOARD & ORIGINAL PREDICTION LOGIC
 const dashboardModal = document.getElementById('dashboardModal');
+const periodEl = document.getElementById('period');
+const timerEl = document.getElementById('timer');
+const resultEl = document.getElementById('result');
+const wordEl = document.getElementById('word');
 
 window.openModal = function(name, link, icon) {
     if (!isVIPUnlocked) {
-        alert("⚠️ Security Alert: Please Unlock VIP First!");
+        alert("⚠️ Security Alert: Unlock VIP First!");
         showPage('page2');
         return;
     }
-    
     document.getElementById('dialogTitle').textContent = name + ' • Prediction';
     document.getElementById('dIcon').src = icon;
     document.getElementById('frame').src = link;
     dashboardModal.classList.add('show');
-    dashboardModal.style.pointerEvents = "auto"; // Fix click issue
+    dashboardModal.style.pointerEvents = "auto";
+    vibrate(15);
+    toastMsg('Opened ' + name);
 }
 
 window.closeDashboardModal = function() {
     dashboardModal.classList.remove('show');
+    vibrate(10);
 }
+
+// === ORIGINAL CALCULATION LOGIC ===
+function updatePeriod() {
+    const now = new Date();
+    const y = now.getUTCFullYear();
+    const m = String(now.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(now.getUTCDate()).padStart(2, '0');
+    const minutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+
+    // Standard Period Formula
+    const period = `${y}${m}${d}1000${10001 + minutes}`;
+    periodEl.textContent = 'Period: ' + period;
+
+    // The Logic: Sum of last two digits
+    const lastTwo = period.slice(-2);
+    let sum = [...lastTwo].reduce((a, b) => a + parseInt(b), 0);
+    if (sum > 9) sum = [...String(sum)].reduce((a, b) => a + parseInt(b), 0);
+
+    const word = sum >= 5 ? 'BIG' : 'SMALL';
+    wordEl.textContent = word;
+    
+    // Timer
+    const sec = now.getUTCSeconds();
+    const remaining = 60 - sec;
+    timerEl.textContent = 'Next in 00:' + String(remaining).padStart(2, '0');
+    
+    // Result Visuals
+    resultEl.classList.add('show');
+    wordEl.classList.add('pulse');
+}
+
+// Run logic loop
+setInterval(updatePeriod, 1000);
+updatePeriod(); // Run immediately
 
 window.predictResult = function() {
-    const resEl = document.getElementById('result');
-    const wordEl = document.getElementById('word');
-    
-    resEl.style.opacity = '0';
-    wordEl.innerText = "ANALYZING...";
-    resEl.classList.add('show');
-
-    setTimeout(() => {
-        const outcomes = ['BIG 🟢', 'SMALL 🔴', 'BIG 🟢', 'SMALL 🔴', 'GREEN 🟢', 'RED 🔴'];
-        const random = outcomes[Math.floor(Math.random() * outcomes.length)];
-        wordEl.innerText = random;
-        resEl.style.opacity = '1';
-    }, 1500);
-}
-
-// Timer Logic
-setInterval(() => {
-    const now = new Date();
-    const period = `${now.getUTCFullYear()}${now.getUTCMonth()+1}${now.getUTCDate()}1000${10001 + (now.getUTCHours()*60 + now.getUTCMinutes())}`;
-    document.getElementById('period').innerText = 'Period: ' + period;
-    
-    const sec = 60 - now.getUTCSeconds();
-    document.getElementById('timer').innerText = `00:${sec < 10 ? '0'+sec : sec}`;
-}, 1000);
+    vibrate(120);
+    beep();
+    toastMsg('Prediction triggered');
+    const b = document.getElementById('predictBtn');
+    b.style.transform = 'scale(.98)';
+    setTimeout(() => b.style.transform = '', 140);
+            }
