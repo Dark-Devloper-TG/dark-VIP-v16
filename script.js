@@ -212,4 +212,4 @@ window.predictResult = function() {
     const b = document.getElementById('predictBtn');
     b.style.transform = 'scale(.98)';
     setTimeout(() => b.style.transform = '', 140);
-            }
+           }
