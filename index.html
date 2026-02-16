@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DARK VIP SYSTEM 🔥</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&amp;family=Orbitron:wght@500;700&amp;display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Firebase (Important: Isko yahi rehne do) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <style>
+        /* ============ COMMON STYLES ============ */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; overflow-x: hidden; font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        /* ============ PAGE SYSTEM ============ */
+        .page { display: none; width: 100%; height: 100vh; position: fixed; top: 0; left: 0; overflow-y: auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .page.active { display: block; }
+
+        /* ============ PAGE 1 - WELCOME SCREEN ============ */
+        #page1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .welcome-container { width: 100%; max-width: 400px; background: rgba(255, 255, 255, 0.95); border-radius: 24px; padding: 30px; text-align: center; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px); }
+        .logo-section img { width: 120px; height: 120px; border-radius: 50%; margin-bottom: 20px; border: 4px solid white; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); }
+        .logo-section h1 { font-size: 32px; font-weight: 800; color: #333; margin-bottom: 10px; font-family: 'Orbitron', sans-serif; }
+        .vip-badge { display: inline-block; background: linear-gradient(45deg, #FFD700, #FFA500); color: #000; padding: 8px 20px; border-radius: 50px; font-weight: 800; font-size: 14px; margin: 15px 0; box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3); }
+        
+        button { cursor: pointer; } /* Ensure buttons show pointer */
+        
+        .game-select-btn { width: 100%; padding: 18px; background: linear-gradient(45deg, #4CAF50, #2E7D32); border: none; border-radius: 15px; color: white; font-size: 18px; font-weight: 700; margin: 15px 0; box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3); transition: transform 0.3s ease; }
+        .game-select-btn:active { transform: scale(0.98); }
+        
+        .start-btn { width: 100%; padding: 18px; background: linear-gradient(45deg, #2196F3, #1976D2); border: none; border-radius: 15px; color: white; font-size: 18px; font-weight: 700; margin: 15px 0; box-shadow: 0 8px 20px rgba(33, 150, 243, 0.3); transition: transform 0.3s ease; }
+        .start-btn:active { transform: scale(0.98); }
+
+        .social-links { display: flex; justify-content: center; gap: 15px; margin: 25px 0; }
+        .social-links a { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; text-decoration: none; transition: transform 0.3s ease; }
+        .whatsapp { background: #25D366; } .telegram { background: #0088cc; } .youtube { background: #FF0000; }
+
+        /* ============ PAGE 2 - VIP UNLOCK ============ */
+        #page2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .vip-unlock-container { width: 100%; max-width: 400px; margin: 50px auto; padding: 30px; background: rgba(255, 255, 255, 0.95); border-radius: 24px; text-align: center; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2); }
+        .vip-title { font-size: 28px; font-weight: 800; color: #333; margin-bottom: 20px; background: linear-gradient(45deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 25px 0; }
+        .price-card { background: white; border-radius: 15px; padding: 20px; text-align: center; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); transition: transform 0.3s ease; border: 2px solid transparent; }
+        .price-card:hover { border-color: #FFD700; }
+        .price-card h3 { font-size: 16px; color: #666; margin-bottom: 10px; }
+        .price-card .price { font-size: 24px; font-weight: 800; color: #2196F3; margin-bottom: 5px; }
+        .price-card .duration { font-size: 12px; color: #999; }
+        
+        .pay-btn { width: 100%; padding: 18px; background: linear-gradient(45deg, #FF9800, #F57C00); border: none; border-radius: 15px; color: white; font-size: 18px; font-weight: 700; margin: 20px 0; box-shadow: 0 8px 20px rgba(255, 152, 0, 0.3); }
+        .code-input { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 12px; font-size: 18px; font-weight: 700; text-align: center; margin: 15px 0; letter-spacing: 3px; }
+        .unlock-btn { width: 100%; padding: 18px; background: linear-gradient(45deg, #4CAF50, #2E7D32); border: none; border-radius: 15px; color: white; font-size: 18px; font-weight: 700; margin: 10px 0; }
+        .back-btn { width: 100%; padding: 12px; background: #666; border: none; border-radius: 12px; color: white; font-size: 16px; font-weight: 600; margin-top: 20px; }
+        .btn { display: inline-block; padding: 10px 20px; border-radius: 10px; background: #0088cc; color: white; font-weight: bold; }
+
+        /* ============ PAGE 3 - DASHBOARD ============ */
+        #page3 { background: #f3f5f9; color: #0b1220; }
+        .bg{ position:fixed; inset:0; z-index:0; pointer-events:none; background: linear-gradient(90deg,rgba(2,6,23,.06) 1px, transparent 1px) 0 0/22px 22px, linear-gradient(0deg ,rgba(2,6,23,.06) 1px, transparent 1px) 0 0/22px 22px; }
+        .wrap{ position:relative; z-index:1; width:100%; max-width:980px; margin:0 auto; padding:18px 14px 24px; }
+        .top{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+        .brand{ display:flex; align-items:center; gap:12px; padding:10px 12px; background:white; border-radius:18px; box-shadow:0 6px 18px rgba(2,6,23,.08); }
+        .brand img{ width:44px; height:44px; object-fit:cover; border-radius:12px; }
+        .brand h1{ margin:0; font-size:22px; font-weight:800; letter-spacing:.2px; }
+        
+        .grid{ display:grid; gap:16px; grid-template-columns:repeat(auto-fill,minmax(168px,1fr)); margin-top:10px; }
+        .card{ background:white; border-radius:22px; box-shadow:0 6px 18px rgba(2,6,23,.08); padding:14px; display:flex; flex-direction:column; align-items:center; gap:10px; cursor:pointer; transform:translateZ(0); transition:box-shadow .2s ease, transform .12s ease; }
+        .card:active{ transform:translateY(2px); }
+        .icon{ width:66px; height:66px; border-radius:16px; object-fit:cover; border:1px solid #e6eaf2; }
+        .card-title{ text-align:center; font-size:14px; font-weight:900; color:#0b1220; }
+        .badge{ margin-top:-2px; padding:6px 10px; font-size:11px; font-weight:900; color:#0369a1; background:#e0f2fe; border-radius:999px; }
+
+        /* Modal & Bottom Sheet */
+        .modal{ position:fixed; inset:0; z-index:60; display:flex; align-items:flex-end; justify-content:center; pointer-events:none; opacity:0; transition:opacity .25s ease; padding:0 10px 10px; }
+        .modal.show{ pointer-events:auto; opacity:1; }
+        .scrim{ position:absolute; inset:0; background:rgba(2,6,23,.46); }
+        .sheet{ position:relative; width:100%; max-width:520px; background:rgba(255,255,255,.95); border-radius:22px 22px 0 0; box-shadow:0 -18px 46px rgba(2,6,23,.35); transform:translateY(100%); transition:transform .45s cubic-bezier(.22,.9,.24,1); display:flex; flex-direction:column; overflow:hidden; }
+        .modal.show .sheet{ transform:translateY(0); }
+        
+        .head{ display:flex; align-items:center; justify-content:space-between; padding:10px 14px 8px; }
+        .title{ font-size:14px; font-weight:900; color:#0f172a; display:flex; align-items:center; gap:10px; }
+        .close{ width:34px; height:34px; border-radius:10px; border:none; cursor:pointer; background:#ef4444; color:#fff; font-weight:900; }
+        .panel{ display:flex; flex-direction:column; gap:10px; padding:0 14px 14px; }
+        .viewer{ width:100%; aspect-ratio:3/4; border-radius:16px; overflow:hidden; border:1px solid #ddd; background:#fff; }
+        .viewer iframe{ width:100%; height:100%; border:0; }
+        .meta{ display:grid; grid-template-columns:1fr auto; align-items:end; gap:10px; }
+        .result{ display:flex; justify-content:center; align-items:center; min-height:42px; padding:8px; border-radius:14px; background:#f1f5f9; font-weight:900; color:#0b1220; opacity:0; transition:opacity .8s ease; }
+        .result.show{ opacity:1; }
+        .controls{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:2px; }
+        .action{ height:44px; border:none; border-radius:14px; cursor:pointer; font-weight:900; }
+        .action.primary{ background:#111827; color:#fff; }
+        .action.secondary{ background:#e5e7eb; color:#111827; }
+
+        /* Game Selection & QR Modal */
+        #gameModal, #qrModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; }
+        .game-option { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 12px; font-weight: 700; cursor: pointer; }
+        .game-option:hover { background: #2196F3; color: white; }
+        #qrImg { width: 300px; height: 300px; border-radius: 10px; margin: 20px 0; border: 2px solid #ddd; }
+        
+        @media (max-width: 480px) { .price-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <!-- PAGE 1 - Welcome Screen -->
+    <div class="page active" id="page1">
+        <div class="welcome-container">
+            <div class="logo-section">
+                <img src="https://i.ibb.co/v9JXJfM/IMG-20260216-000540-500.jpg" alt="DARK Logo">
+                <h1>DARK VIP</h1>
+                <p>Premium Prediction System</p>
+                <div class="vip-badge">⚡ VIP ACCESS ⚡</div>
+            </div>
+            
+            <button class="game-select-btn" id="selectGameBtn">
+                <i class="fas fa-gamepad"></i> SELECT GAME
+            </button>
+            
+            <div id="selectedGameText" style="margin: 15px 0; color: #666; font-weight: 600;">
+                Please select a game to continue
+            </div>
+            
+            <button class="start-btn" id="startNowBtn">
+                <i class="fas fa-rocket"></i> START NOW
+            </button>
+            
+            <div class="social-links">
+                <a href="https://whatsapp.com/" class="whatsapp" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                <a href="https://t.me/+I4PR3U2C6t4yMWQ1" class="telegram" target="_blank"><i class="fab fa-telegram-plane"></i></a>
+                <a href="https://youtube.com/@GauravxFF_01" class="youtube" target="_blank"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 2 - VIP Unlock -->
+    <div class="page" id="page2">
+        <div class="vip-unlock-container">
+            <h1 class="vip-title">UNLOCK VIP ACCESS</h1>
+            <p style="color: #666; margin-bottom: 25px;">Get premium predictions and tools</p>
+            
+            <div class="price-grid">
+                <div class="price-card"><h3>3 DAYS</h3><div class="price">₹250</div><div class="duration">Trial</div></div>
+                <div class="price-card"><h3>7 DAYS</h3><div class="price">₹700</div><div class="duration">Weekly</div></div>
+                <div class="price-card"><h3>30 DAYS</h3><div class="price">₹1200</div><div class="duration">Monthly</div></div>
+            </div>
+            
+            <button class="pay-btn" id="payNowBtn"><i class="fas fa-qrcode"></i> PAY NOW (QR CODE)</button>
+            
+            <a href="https://t.me/DARKxERA" class="btn" target="_blank" style="text-decoration: none; display: block; margin: 15px 0;">
+                <i class="fab fa-telegram"></i> SEND PAYMENT SCREENSHOT
+            </a>
+            
+            <input type="number" id="vipCode" class="code-input" placeholder="Enter 6-digit VIP Code" maxlength="6">
+            
+            <button class="unlock-btn" id="unlockVipBtn"><i class="fas fa-unlock"></i> UNLOCK VIP ACCESS</button>
+            <button class="back-btn" id="backBtn"><i class="fas fa-arrow-left"></i> BACK TO HOME</button>
+        </div>
+    </div>
+
+    <!-- PAGE 3 - Dashboard -->
+    <div class="page" id="page3">
+        <div class="bg"></div>
+        <div class="wrap">
+            <div class="top">
+                <div class="brand">
+                    <img src="https://i.ibb.co/v9JXJfM/IMG-20260216-000540-500.jpg" alt="logo" />
+                    <h1>DARK VIP</h1>
+                </div>
+            </div>
+
+            <!-- Grid of apps -->
+            <div class="grid" id="grid">
+                <div class="card" onclick="openModal('55 Club','https://www.in979.in','https://i.ibb.co/pvXx2ZBR/x.jpg')">
+                    <img class="icon" src="https://i.ibb.co/pvXx2ZBR/x.jpg" alt="55 Club" />
+                    <div class="card-title">55 Club</div>
+                    <div class="badge">VIP</div>
+                </div>
+                <div class="card" onclick="openModal('Jalwa Game','https://jalwa.win','https://i.ibb.co/32X4Kdb/jalwa-game-logo-2.png')">
+                    <img class="icon" src="https://i.ibb.co/32X4Kdb/jalwa-game-logo-2.png" alt="Jalwa Game" />
+                    <div class="card-title">Jalwa Game</div>
+                    <div class="badge">VIP</div>
+                </div>
+                <div class="card" onclick="openModal('91 Club','https://91777.in','https://i.ibb.co/LDLB7gCD/x.jpg')">
+                    <img class="icon" src="https://i.ibb.co/LDLB7gCD/x.jpg" alt="91 Club" />
+                    <div class="card-title">91 Club</div>
+                    <div class="badge">VIP</div>
+                </div>
+                <div class="card" onclick="openModal('Tiranga','https://www.tirangaclub.org','https://i.ibb.co/LzrzcJG2/x.jpg')">
+                    <img class="icon" src="https://i.ibb.co/LzrzcJG2/x.jpg" alt="Tiranga" />
+                    <div class="card-title">Tiranga</div>
+                    <div class="badge">VIP</div>
+                </div>
+            </div>
+
+            <div class="cta" style="margin-top:20px; text-align:center;">
+                <a href="https://t.me/DARKxERA" target="_blank" class="btn"><i class="fab fa-telegram"></i> Join VIP Telegram</a>
+            </div>
+        </div>
+
+        <!-- Bottom Sheet Modal -->
+        <div id="dashboardModal" class="modal">
+            <div class="scrim" onclick="closeDashboardModal()"></div>
+            <section class="sheet">
+                <div class="head">
+                    <div class="title">
+                        <img id="dIcon" src="" width="30" height="30" style="border-radius:5px" />
+                        <span id="dialogTitle">Prediction Panel</span>
+                    </div>
+                    <button class="close" onclick="closeDashboardModal()">×</button>
+                </div>
+
+                <div class="panel">
+                    <div class="viewer">
+                        <iframe id="frame" src=""></iframe>
+                    </div>
+                    <div class="meta">
+                        <div class="period" id="period">Period: —</div>
+                        <div class="timer" id="timer" style="color:#2196F3; font-weight:bold;">00:00</div>
+                    </div>
+                    <div class="result" id="result"><span class="word" id="word">—</span></div>
+                    <div class="controls">
+                        <button class="action primary" onclick="predictResult()">Predict</button>
+                        <button class="action secondary" onclick="closeDashboardModal()">Close</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Game Selection Modal -->
+    <div id="gameModal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 25px; color: #333;">Select Your Game</h2>
+            <div class="game-option" onclick="selectGame('JALWA GAME')">JALWA GAME</div>
+            <div class="game-option" onclick="selectGame('BDG GAME')">BDG GAME</div>
+            <div class="game-option" onclick="selectGame('TASAN WIN')">TASAN WIN</div>
+            <div class="game-option" onclick="selectGame('91 CLUB')">91 CLUB</div>
+            <div class="game-option" onclick="selectGame('ALL PLATFORM')">ALL PLATFORM</div>
+            <button class="back-btn" style="margin-top:15px" onclick="document.getElementById('gameModal').style.display='none'">CLOSE</button>
+        </div>
+    </div>
+
+    <!-- QR Modal -->
+    <div id="qrModal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 20px; color: #333;">Scan to Pay</h2>
+            <img id="qrImg" src="https://img.sanishtech.com/u/e6a1ddfcf08cf406b8b084e386cdfa55.jpg" alt="UPI QR">
+            <div style="margin: 15px 0; padding: 10px; background: #f0f0f0; border-radius: 8px; font-weight: 700;">
+                8564834381@ybl
+            </div>
+            <button class="pay-btn" onclick="navigator.clipboard.writeText('devansh7999@ybl');alert('UPI Copied!')">Copy UPI ID</button>
+            <button class="back-btn" onclick="document.getElementById('qrModal').style.display='none'">Close</button>
+        </div>
+    </div>
+
+    <!-- LINK TO LOGIC FILE (Isse code secure rahega) -->
+    <script src="script.js"></script>
+</body>
+</html>
